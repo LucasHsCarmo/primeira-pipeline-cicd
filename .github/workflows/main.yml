@@ -23,3 +23,21 @@ jobs:
         tags: |
           lucascarmo/aula-primeira-pipeline:v${{ github.run_number }}
           lucascarmo/aula-primeira-pipeline:latest
+  CD:
+    runs-on: ubuntu-latest
+    needs: [CI]
+    steps:
+      - name: Obtendo o código
+        uses: actions/checkout@v4.1.7
+      - name: Configuração de contexto do Kubernetes
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.K8S_CONFIG }}
+      - name: Execução do manifesto
+        uses: Azure/k8s-deploy@v5.0.0
+        with:
+          manifests: |
+              ./k8s/deployment.yaml
+          images: |
+              lucascarmo/aula-primeira-pipeline:v${{ github.run_number }}
